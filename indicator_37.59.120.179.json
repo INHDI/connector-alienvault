@@ -1,0 +1,13 @@
+{
+    "id": "indicator--58c28a5e-1164-5e7c-909d-b0b60c497632",
+    "created_by_ref": "{\"type\": \"identity\", \"spec_version\": \"2.1\", \"id\": \"identity--d9cc7578-ce1e-5919-83e7-7b0e1c5c20d2\", \"created_by_ref\": \"identity--e52b2fa3-2af0-5e53-ad38-17d54b3d61cb\", \"created\": \"2023-02-08T18:21:50.569018Z\", \"modified\": \"2023-02-08T18:21:50.569018Z\", \"name\": \"jamesbrine\", \"identity_class\": \"organization\"}",
+    "name": "37.59.120.179",
+    "description": "",
+    "pattern": "[ipv4-addr:value = '37.59.120.179']",
+    "pattern_type": "stix",
+    "valid_from": "2023-02-07 09:43:04",
+    "labels": "['vultr', 'ssh', 'scanners', 'honeypot']",
+    "confidence": 15,
+    "object_marking_refs": "[MarkingDefinition(type='marking-definition', spec_version='2.1', id='marking-definition--34098fce-860f-48ae-8e50-ebd3cc5e41da', created='2017-01-20T00:00:00.000Z', definition_type='tlp', name='TLP:GREEN', definition=TLPMarking(tlp='green'))]",
+    "custom_properties": "{'x_opencti_score': 50, 'x_opencti_main_observable_type': 'IPv4-Addr'}"
+}

